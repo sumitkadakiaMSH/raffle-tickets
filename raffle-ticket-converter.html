@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raffle Ticket Converter</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --ink: #1c2331;
+    --muted: #6b7484;
+    --line: #e2e6ef;
+    --accent: #4f46e5;
+    --accent-dark: #3f37c9;
+    --good: #0e9f6e;
+    --warn: #b45309;
+    --warn-bg: #fef3c7;
+    --bad: #b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 { margin: 0 0 4px; font-size: 26px; }
+  header p { margin: 0 0 24px; color: var(--muted); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(20,30,60,.04);
+  }
+  .card h2 { margin: 0 0 14px; font-size: 16px; letter-spacing: .01em; }
+
+  /* Drop zone */
+  #drop {
+    border: 2px dashed var(--line);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    color: var(--muted);
+  }
+  #drop.drag { border-color: var(--accent); background: #eef0fe; color: var(--accent-dark); }
+  #drop strong { color: var(--ink); }
+  #drop .big { font-size: 15px; margin-bottom: 6px; }
+  #fileInput { display: none; }
+
+  /* Settings grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  .field input {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--line);
+    border-radius: 8px; font-size: 14px; color: var(--ink);
+  }
+  .field input:focus { outline: none; border-color: var(--accent); }
+
+  .btn {
+    appearance: none; border: none; cursor: pointer; font-size: 14px; font-weight: 600;
+    padding: 11px 18px; border-radius: 9px; background: var(--accent); color: #fff;
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  .btn:disabled { background: #c7cad6; cursor: not-allowed; }
+  .btn.secondary { background: #eef0f6; color: var(--ink); }
+  .btn.secondary:hover { background: #e1e4ee; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+
+  /* Summary */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+  .stat { background: #f8f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .stat .num { font-size: 22px; font-weight: 700; }
+  .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stat .num.range { font-size: 17px; }
+
+  .note { padding: 11px 14px; border-radius: 9px; font-size: 13.5px; margin-top: 12px; }
+  .note.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #fcd34d; }
+  .note.bad { background: #fee2e2; color: var(--bad); border: 1px solid #fca5a5; }
+  .note.good { background: #e7f6ef; color: var(--good); border: 1px solid #9ae0c2; }
+
+  /* Table */
+  .tablewrap { overflow: auto; border: 1px solid var(--line); border-radius: 10px; max-height: 460px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { position: sticky; top: 0; background: #f3f4fa; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  tbody tr:hover { background: #f8f9fc; }
+  td.tk { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎟️ Raffle Ticket Converter</h1>
+    <p>Drop in the donations CSV and get a ticket-by-ticket list ready to print. Everything runs in your browser — nothing is uploaded anywhere.</p>
+  </header>
+
+  <div class="card">
+    <h2>1. Load donations CSV</h2>
+    <div id="drop">
+      <div class="big"><strong>Drag &amp; drop</strong> your CSV here</div>
+      <div>or click to browse</div>
+      <input type="file" id="fileInput" accept=".csv,text/csv">
+    </div>
+    <div id="fileInfo" class="muted" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Settings</h2>
+    <div class="grid">
+      <div class="field">
+        <label>Price per ticket ($)</label>
+        <input type="number" id="price" value="5" min="0.01" step="0.01">
+      </div>
+      <div class="field">
+        <label>Roll 1 start #</label>
+        <input type="number" id="roll1" value="100001" step="1">
+      </div>
+      <div class="field">
+        <label>Tickets per roll</label>
+        <input type="number" id="rollSize" value="2000" step="1">
+      </div>
+      <div class="field">
+        <label>Roll 2 start #</label>
+        <input type="number" id="roll2" value="730161" step="1">
+      </div>
+    </div>
+    <div class="actions" style="margin-top:16px;">
+      <button class="btn" id="generate" disabled>Generate Tickets</button>
+      <button class="btn secondary hidden" id="download">Download CSV</button>
+      <span id="genHint" class="muted">Load a CSV to enable.</span>
+    </div>
+  </div>
+
+  <div class="card hidden" id="summaryCard">
+    <h2>Summary</h2>
+    <div class="stats" id="stats"></div>
+    <div id="notes"></div>
+  </div>
+
+  <div class="card hidden" id="previewCard">
+    <h2>Preview <span id="previewCount" class="muted"></span></h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>Email</th><th># Tickets</th><th>PaymentID</th><th>Donor Name</th><th>Raffle Ticket #</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- CSV parsing (handles quoted fields, commas, newlines) ----------
+function parseCSV(text) {
+  text = text.replace(/^﻿/, ""); // strip BOM
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ""; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
+      else if (c === '\r') { /* ignore */ }
+      else field += c;
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  // drop fully-empty trailing rows
+  return rows.filter(r => r.some(v => String(v).trim() !== ""));
+}
+
+function parseAmount(val) {
+  if (typeof val === "number") return val;
+  const n = parseFloat(String(val).replace(/[^0-9.\-]/g, ""));
+  return isNaN(n) ? 0 : n;
+}
+
+// ---------- state ----------
+let parsedRows = null;   // raw CSV rows incl header
+let outputRows = null;   // generated [ [email, count, pid, donor, ticket], ... ] (no header)
+
+const REQUIRED = ["Email", "Number of raffle tickets", "PaymentID", "Donor Name", "Raffle Ticket Number"];
+
+// ---------- file handling ----------
+const drop = document.getElementById("drop");
+const fileInput = document.getElementById("fileInput");
+const fileInfo = document.getElementById("fileInfo");
+const generateBtn = document.getElementById("generate");
+const downloadBtn = document.getElementById("download");
+const genHint = document.getElementById("genHint");
+
+drop.addEventListener("click", () => fileInput.click());
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("drag"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+drop.addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("drag");
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      parsedRows = parseCSV(reader.result);
+      const cols = parsedRows[0] || [];
+      const donations = parsedRows.length - 1;
+      fileInfo.innerHTML = "Loaded <strong>" + file.name + "</strong> — " + donations + " rows, " + cols.length + " columns.";
+      generateBtn.disabled = false;
+      genHint.textContent = "Ready. Click Generate Tickets.";
+      // reset prior output
+      outputRows = null;
+      downloadBtn.classList.add("hidden");
+      document.getElementById("summaryCard").classList.add("hidden");
+      document.getElementById("previewCard").classList.add("hidden");
+    } catch (err) {
+      fileInfo.innerHTML = '<span style="color:var(--bad)">Could not read that file: ' + err.message + "</span>";
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ---------- ticket generation ----------
+function colIndex(header, name) {
+  const i = header.findIndex(h => h.trim().toLowerCase() === name.toLowerCase());
+  return i;
+}
+
+generateBtn.addEventListener("click", () => {
+  const header = parsedRows[0];
+  const rows = parsedRows.slice(1);
+
+  const idxEmail = colIndex(header, "Email");
+  const idxPid   = colIndex(header, "PaymentID");
+  const idxDonor = colIndex(header, "Donor Name");
+  const idxAmt   = colIndex(header, "Amount");
+
+  const missing = [];
+  if (idxEmail < 0) missing.push("Email");
+  if (idxPid < 0) missing.push("PaymentID");
+  if (idxDonor < 0) missing.push("Donor Name");
+  if (idxAmt < 0) missing.push("Amount");
+  if (missing.length) {
+    showNotes('<div class="note bad">Missing expected column(s): <strong>' + missing.join(", ") +
+      "</strong>. Found: " + header.join(", ") + "</div>");
+    document.getElementById("summaryCard").classList.remove("hidden");
+    document.getElementById("stats").innerHTML = "";
+    return;
+  }
+
+  const price    = parseFloat(document.getElementById("price").value) || 5;
+  const roll1     = parseInt(document.getElementById("roll1").value, 10);
+  const rollSize  = parseInt(document.getElementById("rollSize").value, 10);
+  const roll2     = parseInt(document.getElementById("roll2").value, 10);
+
+  function ticketNumber(i) {
+    if (i < rollSize) return roll1 + i;
+    if (i < rollSize * 2) return roll2 + (i - rollSize);
+    return roll2 + (i - rollSize); // keeps counting past roll 2; flagged in notes
+  }
+
+  outputRows = [];
+  let ticketIndex = 0, skipped = 0, donationsUsed = 0, totalDollars = 0;
+
+  rows.forEach(r => {
+    const amount = parseAmount(r[idxAmt]);
+    const count = Math.floor(amount / price);
+    if (count > 0) {
+      donationsUsed++;
+      totalDollars += amount;
+      const email = r[idxEmail], pid = r[idxPid], donor = r[idxDonor];
+      for (let k = 0; k < count; k++) {
+        outputRows.push([email, count, pid, donor, ticketNumber(ticketIndex)]);
+        ticketIndex++;
+      }
+    } else {
+      skipped++;
+    }
+  });
+
+  renderSummary({ ticketIndex, skipped, donationsUsed, totalDollars, roll1, roll2, rollSize });
+  renderPreview();
+  downloadBtn.classList.remove("hidden");
+});
+
+function renderSummary(s) {
+  const total = s.ticketIndex;
+  let firstNum = total > 0 ? (0 < s.rollSize ? s.roll1 : s.roll2) : null;
+  // first ticket is always roll1 start when total>0
+  const lastIdx = total - 1;
+  const lastNum = total > 0 ? ticketNumberFor(lastIdx, s) : null;
+
+  const stats = [
+    { num: s.donationsUsed.toLocaleString(), lbl: "Donations with tickets" },
+    { num: total.toLocaleString(), lbl: "Tickets generated" },
+    { num: "$" + s.totalDollars.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}), lbl: "Donation total" },
+    { num: total > 0 ? (s.roll1 + " – " + lastNum) : "—", lbl: "Ticket # range", range: true },
+    { num: s.skipped.toLocaleString(), lbl: "Rows skipped (< 1 ticket)" },
+  ];
+  document.getElementById("stats").innerHTML = stats.map(x =>
+    '<div class="stat"><div class="num ' + (x.range ? 'range' : '') + '">' + x.num + '</div><div class="lbl">' + x.lbl + "</div></div>"
+  ).join("");
+
+  let notes = "";
+  if (total > s.rollSize) {
+    const intoRoll2 = total - s.rollSize;
+    notes += '<div class="note warn">⚠️ This run crosses into the <strong>second roll</strong> (starts at ' +
+      s.roll2 + '). ' + intoRoll2.toLocaleString() + ' ticket(s) come from roll 2.</div>';
+  }
+  if (total > s.rollSize * 2) {
+    notes += '<div class="note bad">🚨 You\'ve exceeded the capacity of <strong>both rolls</strong> (' +
+      (s.rollSize * 2).toLocaleString() + ' tickets). Numbers past that point keep counting from roll 2 and may not match real tickets. You\'ll need a third roll.</div>';
+  }
+  if (s.skipped > 0) {
+    notes += '<div class="note">' + s.skipped.toLocaleString() +
+      ' row(s) were skipped because the amount was less than one ticket\'s price.</div>';
+  }
+  if (total > 0 && total <= s.rollSize) {
+    notes += '<div class="note good">✅ All ' + total.toLocaleString() + ' tickets fit on roll 1.</div>';
+  }
+  showNotes(notes);
+  document.getElementById("summaryCard").classList.remove("hidden");
+}
+
+// standalone ticket number used by summary (mirrors generator)
+function ticketNumberFor(i, s) {
+  if (i < s.rollSize) return s.roll1 + i;
+  return s.roll2 + (i - s.rollSize);
+}
+
+function showNotes(html) { document.getElementById("notes").innerHTML = html || ""; }
+
+function renderPreview() {
+  const tbody = document.getElementById("tbody");
+  const LIMIT = 500;
+  const shown = outputRows.slice(0, LIMIT);
+  tbody.innerHTML = shown.map(r =>
+    "<tr><td>" + esc(r[0]) + "</td><td>" + r[1] + "</td><td>" + esc(r[2]) +
+    "</td><td>" + esc(r[3]) + '</td><td class="tk">' + r[4] + "</td></tr>"
+  ).join("");
+  document.getElementById("previewCount").textContent =
+    outputRows.length > LIMIT
+      ? "(showing first " + LIMIT + " of " + outputRows.length.toLocaleString() + " — full set in the download)"
+      : "(" + outputRows.length.toLocaleString() + " rows)";
+  document.getElementById("previewCard").classList.remove("hidden");
+}
+
+function esc(v) {
+  return String(v == null ? "" : v)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// ---------- download ----------
+function csvCell(v) {
+  const s = String(v == null ? "" : v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+downloadBtn.addEventListener("click", () => {
+  if (!outputRows) return;
+  const lines = [REQUIRED.join(",")];
+  outputRows.forEach(r => lines.push(r.map(csvCell).join(",")));
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "raffle-tickets.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
