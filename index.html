@@ -3,119 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Raffle Ticket Converter</title>
+<title>🎟️ Preschool Raffle Ticket Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f4f6fb;
+    --bg: #fff7ec;
     --card: #ffffff;
-    --ink: #1c2331;
-    --muted: #6b7484;
-    --line: #e2e6ef;
-    --accent: #4f46e5;
-    --accent-dark: #3f37c9;
-    --good: #0e9f6e;
-    --warn: #b45309;
-    --warn-bg: #fef3c7;
-    --bad: #b91c1c;
+    --ink: #3a2f4a;
+    --muted: #8a7f96;
+    --line: #f0e3d4;
+    --accent: #ff7a59;        /* tangerine */
+    --accent-dark: #f25c3b;
+    --blue: #4cb9e8;          /* sky */
+    --mint: #2bc4a8;          /* mint */
+    --sun: #ffce4a;           /* sunny yellow */
+    --grape: #9b6bd6;         /* grape */
+    --good: #1aa179;
+    --warn: #b4690e;
+    --warn-bg: #fff2d1;
+    --bad: #d6453d;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
+    font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--ink);
-    line-height: 1.5;
+    line-height: 1.55;
+    background-color: var(--bg);
+    /* soft confetti dots */
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(76,185,232,.16) 0 8px, transparent 9px),
+      radial-gradient(circle at 88% 12%, rgba(255,122,89,.16) 0 10px, transparent 11px),
+      radial-gradient(circle at 78% 82%, rgba(43,196,168,.16) 0 9px, transparent 10px),
+      radial-gradient(circle at 22% 88%, rgba(255,206,74,.20) 0 11px, transparent 12px),
+      radial-gradient(circle at 50% 40%, rgba(155,107,214,.10) 0 7px, transparent 8px);
+    background-attachment: fixed;
   }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 20px 80px; }
-  header h1 { margin: 0 0 4px; font-size: 26px; }
-  header p { margin: 0 0 24px; color: var(--muted); }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  /* Playful header banner */
+  header {
+    background: linear-gradient(135deg, #ff9a6b 0%, #ff7a59 45%, #ff6b8b 100%);
+    border-radius: 26px;
+    padding: 30px 30px 28px;
+    margin-bottom: 24px;
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(255,122,89,.30);
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0; height: 8px;
+    background: repeating-linear-gradient(90deg,
+      var(--sun) 0 28px, var(--mint) 28px 56px, var(--blue) 56px 84px, #ff6b8b 84px 112px);
+  }
+  header h1 {
+    margin: 0 0 6px; font-family: "Baloo 2", cursive; font-weight: 800;
+    font-size: 34px; line-height: 1.1; letter-spacing: .01em;
+    text-shadow: 0 2px 0 rgba(0,0,0,.08);
+  }
+  header p { margin: 0; font-size: 16px; font-weight: 600; color: rgba(255,255,255,.95); max-width: 60ch; }
+
   .card {
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 22px;
+    border: 2px solid var(--line);
+    border-radius: 22px;
+    padding: 24px;
     margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(20,30,60,.04);
+    box-shadow: 0 6px 18px rgba(120,90,60,.07);
   }
-  .card h2 { margin: 0 0 14px; font-size: 16px; letter-spacing: .01em; }
+  .card h2 {
+    margin: 0 0 16px; font-family: "Baloo 2", cursive; font-weight: 700;
+    font-size: 20px; letter-spacing: .01em; color: var(--ink);
+  }
 
   /* Drop zone */
   #drop {
-    border: 2px dashed var(--line);
-    border-radius: 12px;
-    padding: 40px 20px;
+    border: 3px dashed #f3c9b3;
+    border-radius: 18px;
+    padding: 44px 20px;
     text-align: center;
     cursor: pointer;
-    transition: border-color .15s, background .15s;
+    transition: border-color .15s, background .15s, transform .15s;
     color: var(--muted);
+    background: #fffaf4;
   }
-  #drop.drag { border-color: var(--accent); background: #eef0fe; color: var(--accent-dark); }
+  #drop:hover { transform: translateY(-2px); border-color: var(--accent); }
+  #drop.drag { border-color: var(--accent); background: #fff0e8; color: var(--accent-dark); transform: scale(1.01); }
   #drop strong { color: var(--ink); }
-  #drop .big { font-size: 15px; margin-bottom: 6px; }
+  #drop .emoji { font-size: 40px; display: block; margin-bottom: 8px; }
+  #drop .big { font-size: 17px; margin-bottom: 4px; font-weight: 700; }
   #fileInput { display: none; }
 
   /* Settings grid */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
-  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
   .field input {
-    width: 100%; padding: 9px 11px; border: 1px solid var(--line);
-    border-radius: 8px; font-size: 14px; color: var(--ink);
+    width: 100%; padding: 11px 13px; border: 2px solid var(--line);
+    border-radius: 12px; font-size: 15px; font-family: inherit; font-weight: 700; color: var(--ink);
+    background: #fffaf4;
   }
-  .field input:focus { outline: none; border-color: var(--accent); }
+  .field input:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(255,122,89,.15); }
 
   .btn {
-    appearance: none; border: none; cursor: pointer; font-size: 14px; font-weight: 600;
-    padding: 11px 18px; border-radius: 9px; background: var(--accent); color: #fff;
-    transition: background .15s;
+    appearance: none; border: none; cursor: pointer; font-family: "Baloo 2", cursive;
+    font-size: 16px; font-weight: 700;
+    padding: 13px 24px; border-radius: 14px; color: #fff;
+    background: linear-gradient(135deg, #ff9a6b, #ff7a59);
+    box-shadow: 0 5px 0 var(--accent-dark);
+    transition: transform .1s, box-shadow .1s, background .15s;
   }
-  .btn:hover { background: var(--accent-dark); }
-  .btn:disabled { background: #c7cad6; cursor: not-allowed; }
-  .btn.secondary { background: #eef0f6; color: var(--ink); }
-  .btn.secondary:hover { background: #e1e4ee; }
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+  .btn:hover:not(:disabled) { transform: translateY(2px); box-shadow: 0 3px 0 var(--accent-dark); }
+  .btn:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 var(--accent-dark); }
+  .btn:disabled { background: #e7ddd2; color: #b3a695; box-shadow: 0 5px 0 #d8ccbd; cursor: not-allowed; }
+  .btn.secondary { background: linear-gradient(135deg, #5ec6f0, #4cb9e8); box-shadow: 0 5px 0 #2f9fd4; }
+  .btn.secondary:hover { box-shadow: 0 3px 0 #2f9fd4; }
+  .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
 
   /* Summary */
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
-  .stat { background: #f8f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
-  .stat .num { font-size: 22px; font-weight: 700; }
-  .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .stat .num.range { font-size: 17px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+  .stat { border-radius: 16px; padding: 16px 18px; border: 2px solid transparent; }
+  .stat .num { font-family: "Baloo 2", cursive; font-size: 26px; font-weight: 800; line-height: 1.1; }
+  .stat .lbl { font-size: 12.5px; color: var(--muted); margin-top: 4px; font-weight: 700; }
+  .stat .num.range { font-size: 19px; }
+  .stat:nth-child(5n+1) { background: #fff0e8; border-color: #ffd9c7; }
+  .stat:nth-child(5n+1) .num { color: var(--accent-dark); }
+  .stat:nth-child(5n+2) { background: #e6f6fd; border-color: #c4e9f9; }
+  .stat:nth-child(5n+2) .num { color: #2f9fd4; }
+  .stat:nth-child(5n+3) { background: #e4f8f3; border-color: #bff0e4; }
+  .stat:nth-child(5n+3) .num { color: var(--mint); }
+  .stat:nth-child(5n+4) { background: #fff7df; border-color: #ffe9ab; }
+  .stat:nth-child(5n+4) .num { color: #c79400; }
+  .stat:nth-child(5n+5) { background: #f3ecfb; border-color: #e1d2f4; }
+  .stat:nth-child(5n+5) .num { color: var(--grape); }
 
-  .note { padding: 11px 14px; border-radius: 9px; font-size: 13.5px; margin-top: 12px; }
-  .note.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #fcd34d; }
-  .note.bad { background: #fee2e2; color: var(--bad); border: 1px solid #fca5a5; }
-  .note.good { background: #e7f6ef; color: var(--good); border: 1px solid #9ae0c2; }
+  .note { padding: 13px 16px; border-radius: 14px; font-size: 14.5px; margin-top: 12px; font-weight: 600; }
+  .note.warn { background: var(--warn-bg); color: var(--warn); border: 2px solid #ffdf94; }
+  .note.bad { background: #ffe6e4; color: var(--bad); border: 2px solid #ffc0bb; }
+  .note.good { background: #e2f7ef; color: var(--good); border: 2px solid #b5ead3; }
 
   /* Table */
-  .tablewrap { overflow: auto; border: 1px solid var(--line); border-radius: 10px; max-height: 460px; }
-  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-  th { position: sticky; top: 0; background: #f3f4fa; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
-  tbody tr:hover { background: #f8f9fc; }
-  td.tk { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .muted { color: var(--muted); font-size: 13px; }
+  .tablewrap { overflow: auto; border: 2px solid var(--line); border-radius: 16px; max-height: 460px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { position: sticky; top: 0; background: #fff3e8; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent-dark); font-weight: 800; }
+  tbody tr:nth-child(even) { background: #fffaf4; }
+  tbody tr:hover { background: #fff0e8; }
+  td.tk { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--accent-dark); }
+  .muted { color: var(--muted); font-size: 13.5px; font-weight: 600; }
   .hidden { display: none; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>🎟️ Raffle Ticket Converter</h1>
-    <p>Drop in the donations CSV and get a ticket-by-ticket list ready to print. Everything runs in your browser — nothing is uploaded anywhere.</p>
+    <h1>🎟️ Preschool Raffle Ticket Maker</h1>
+    <p>Drop in your donations file and we'll turn it into a ready-to-print list of raffle tickets. Everything happens right here in your browser — no uploads, no fuss. 🎉</p>
   </header>
 
   <div class="card">
-    <h2>1. Load donations CSV</h2>
+    <h2>1️⃣ Add your donations file</h2>
     <div id="drop">
+      <span class="emoji">📄✨</span>
       <div class="big"><strong>Drag &amp; drop</strong> your CSV here</div>
-      <div>or click to browse</div>
+      <div>or click to pick a file</div>
       <input type="file" id="fileInput" accept=".csv,text/csv">
     </div>
     <div id="fileInfo" class="muted" style="margin-top:10px;"></div>
   </div>
 
   <div class="card">
-    <h2>2. Settings</h2>
+    <h2>2️⃣ Set your numbers</h2>
     <div class="grid">
       <div class="field">
         <label>Price per ticket ($)</label>
@@ -135,20 +196,20 @@
       </div>
     </div>
     <div class="actions" style="margin-top:16px;">
-      <button class="btn" id="generate" disabled>Generate Tickets</button>
-      <button class="btn secondary hidden" id="download">Download CSV</button>
-      <span id="genHint" class="muted">Load a CSV to enable.</span>
+      <button class="btn" id="generate" disabled>🎫 Make Tickets!</button>
+      <button class="btn secondary hidden" id="download">⬇️ Download CSV</button>
+      <span id="genHint" class="muted">Add a file above to get started.</span>
     </div>
   </div>
 
   <div class="card hidden" id="summaryCard">
-    <h2>Summary</h2>
+    <h2>🎉 All done! Here's the recap</h2>
     <div class="stats" id="stats"></div>
     <div id="notes"></div>
   </div>
 
   <div class="card hidden" id="previewCard">
-    <h2>Preview <span id="previewCount" class="muted"></span></h2>
+    <h2>👀 Ticket preview <span id="previewCount" class="muted"></span></h2>
     <div class="tablewrap">
       <table>
         <thead><tr>
@@ -224,7 +285,7 @@ function handleFile(file) {
       const donations = parsedRows.length - 1;
       fileInfo.innerHTML = "Loaded <strong>" + file.name + "</strong> — " + donations + " rows, " + cols.length + " columns.";
       generateBtn.disabled = false;
-      genHint.textContent = "Ready. Click Generate Tickets.";
+      genHint.textContent = "All set — click Make Tickets! 🎫";
       // reset prior output
       outputRows = null;
       downloadBtn.classList.add("hidden");
