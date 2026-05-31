@@ -6,24 +6,27 @@
 <title>🎟️ Preschool Raffle Ticket Maker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #fff7ec;
+    --bg: #faf8ea;            /* warm cream */
     --card: #ffffff;
-    --ink: #3a2f4a;
-    --muted: #8a7f96;
-    --line: #f0e3d4;
-    --accent: #ff7a59;        /* tangerine */
-    --accent-dark: #f25c3b;
-    --blue: #4cb9e8;          /* sky */
-    --mint: #2bc4a8;          /* mint */
-    --sun: #ffce4a;           /* sunny yellow */
-    --grape: #9b6bd6;         /* grape */
-    --good: #1aa179;
+    --ink: #161616;           /* near-black, like the banner type */
+    --muted: #8a8576;
+    --line: #ece7d3;
+    --accent: #f24726;        /* coral-red (flowers) */
+    --accent-dark: #d6391a;
+    --orange: #f7941d;
+    --sun: #ffd400;           /* sunny yellow */
+    --lime: #a4d22a;          /* chartreuse */
+    --green: #7cb342;
+    --blue: #8fd0ec;          /* sky */
+    --pink: #ec4d8f;          /* magenta flower */
+    --pink-soft: #f8c8d8;
+    --good: #5a9e1f;
     --warn: #b4690e;
-    --warn-bg: #fff2d1;
-    --bad: #d6453d;
+    --warn-bg: #fff5cc;
+    --bad: #d6391a;
   }
   * { box-sizing: border-box; }
   body {
@@ -32,67 +35,76 @@
     color: var(--ink);
     line-height: 1.55;
     background-color: var(--bg);
-    /* soft confetti dots */
+    /* big soft organic blobs, echoing the Summer Play Fest art */
     background-image:
-      radial-gradient(circle at 12% 18%, rgba(76,185,232,.16) 0 8px, transparent 9px),
-      radial-gradient(circle at 88% 12%, rgba(255,122,89,.16) 0 10px, transparent 11px),
-      radial-gradient(circle at 78% 82%, rgba(43,196,168,.16) 0 9px, transparent 10px),
-      radial-gradient(circle at 22% 88%, rgba(255,206,74,.20) 0 11px, transparent 12px),
-      radial-gradient(circle at 50% 40%, rgba(155,107,214,.10) 0 7px, transparent 8px);
+      radial-gradient(closest-side at 9% 12%, rgba(164,210,42,.40), transparent 100%),
+      radial-gradient(closest-side at 92% 8%, rgba(143,208,236,.40), transparent 100%),
+      radial-gradient(closest-side at 96% 38%, rgba(255,212,0,.38), transparent 100%),
+      radial-gradient(closest-side at 88% 88%, rgba(236,77,143,.32), transparent 100%),
+      radial-gradient(closest-side at 6% 82%, rgba(143,208,236,.38), transparent 100%),
+      radial-gradient(closest-side at 18% 95%, rgba(255,212,0,.32), transparent 100%),
+      radial-gradient(closest-side at 70% 96%, rgba(248,200,216,.55), transparent 100%);
+    background-size:
+      340px 340px, 300px 300px, 240px 240px, 320px 320px, 300px 300px, 260px 260px, 280px 280px;
+    background-repeat: no-repeat;
     background-attachment: fixed;
   }
   .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px 80px; }
 
-  /* Playful header banner */
+  /* Header banner — clean white with bold black type, like the event art */
   header {
-    background: linear-gradient(135deg, #ff9a6b 0%, #ff7a59 45%, #ff6b8b 100%);
-    border-radius: 26px;
-    padding: 30px 30px 28px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 38px 36px 34px;
     margin-bottom: 24px;
-    color: #fff;
-    box-shadow: 0 12px 30px rgba(255,122,89,.30);
+    color: var(--ink);
+    box-shadow: 0 8px 24px rgba(20,20,20,.08);
     position: relative;
     overflow: hidden;
   }
   header::after {
     content: "";
-    position: absolute; left: 0; right: 0; bottom: 0; height: 8px;
+    position: absolute; left: 0; right: 0; bottom: 0; height: 10px;
     background: repeating-linear-gradient(90deg,
-      var(--sun) 0 28px, var(--mint) 28px 56px, var(--blue) 56px 84px, #ff6b8b 84px 112px);
+      var(--lime) 0 32px, var(--blue) 32px 64px, var(--sun) 64px 96px,
+      var(--accent) 96px 128px, var(--pink) 128px 160px);
+  }
+  header .kicker {
+    font-family: "Permanent Marker", cursive; font-size: 17px;
+    color: var(--accent); margin: 0 0 6px; letter-spacing: .01em;
   }
   header h1 {
-    margin: 0 0 6px; font-family: "Baloo 2", cursive; font-weight: 800;
-    font-size: 34px; line-height: 1.1; letter-spacing: .01em;
-    text-shadow: 0 2px 0 rgba(0,0,0,.08);
+    margin: 0 0 12px; font-family: "Anton", sans-serif; font-weight: 400;
+    font-size: 46px; line-height: .96; letter-spacing: .01em; text-transform: uppercase;
   }
-  header p { margin: 0; font-size: 16px; font-weight: 600; color: rgba(255,255,255,.95); max-width: 60ch; }
+  header p { margin: 0; font-size: 16px; font-weight: 600; color: #4a463c; max-width: 62ch; }
 
   .card {
     background: var(--card);
-    border: 2px solid var(--line);
-    border-radius: 22px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
     padding: 24px;
     margin-bottom: 20px;
-    box-shadow: 0 6px 18px rgba(120,90,60,.07);
+    box-shadow: 0 6px 18px rgba(20,20,20,.05);
   }
   .card h2 {
-    margin: 0 0 16px; font-family: "Baloo 2", cursive; font-weight: 700;
-    font-size: 20px; letter-spacing: .01em; color: var(--ink);
+    margin: 0 0 16px; font-family: "Anton", sans-serif; font-weight: 400;
+    font-size: 24px; letter-spacing: .02em; text-transform: uppercase; color: var(--ink);
   }
 
   /* Drop zone */
   #drop {
-    border: 3px dashed #f3c9b3;
-    border-radius: 18px;
+    border: 3px dashed #e3ddc8;
+    border-radius: 16px;
     padding: 44px 20px;
     text-align: center;
     cursor: pointer;
     transition: border-color .15s, background .15s, transform .15s;
     color: var(--muted);
-    background: #fffaf4;
+    background: #fcfbf3;
   }
   #drop:hover { transform: translateY(-2px); border-color: var(--accent); }
-  #drop.drag { border-color: var(--accent); background: #fff0e8; color: var(--accent-dark); transform: scale(1.01); }
+  #drop.drag { border-color: var(--accent); background: #fdeee9; color: var(--accent-dark); transform: scale(1.01); }
   #drop strong { color: var(--ink); }
   #drop .emoji { font-size: 40px; display: block; margin-bottom: 8px; }
   #drop .big { font-size: 17px; margin-bottom: 4px; font-weight: 700; }
@@ -103,42 +115,42 @@
   .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
   .field input {
     width: 100%; padding: 11px 13px; border: 2px solid var(--line);
-    border-radius: 12px; font-size: 15px; font-family: inherit; font-weight: 700; color: var(--ink);
-    background: #fffaf4;
+    border-radius: 10px; font-size: 15px; font-family: inherit; font-weight: 700; color: var(--ink);
+    background: #fcfbf3;
   }
-  .field input:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(255,122,89,.15); }
+  .field input:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(242,71,38,.15); }
 
   .btn {
-    appearance: none; border: none; cursor: pointer; font-family: "Baloo 2", cursive;
-    font-size: 16px; font-weight: 700;
-    padding: 13px 24px; border-radius: 14px; color: #fff;
-    background: linear-gradient(135deg, #ff9a6b, #ff7a59);
+    appearance: none; border: none; cursor: pointer; font-family: "Anton", sans-serif;
+    font-size: 17px; font-weight: 400; letter-spacing: .03em; text-transform: uppercase;
+    padding: 13px 26px; border-radius: 12px; color: #fff;
+    background: var(--accent);
     box-shadow: 0 5px 0 var(--accent-dark);
     transition: transform .1s, box-shadow .1s, background .15s;
   }
   .btn:hover:not(:disabled) { transform: translateY(2px); box-shadow: 0 3px 0 var(--accent-dark); }
   .btn:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 var(--accent-dark); }
-  .btn:disabled { background: #e7ddd2; color: #b3a695; box-shadow: 0 5px 0 #d8ccbd; cursor: not-allowed; }
-  .btn.secondary { background: linear-gradient(135deg, #5ec6f0, #4cb9e8); box-shadow: 0 5px 0 #2f9fd4; }
-  .btn.secondary:hover { box-shadow: 0 3px 0 #2f9fd4; }
+  .btn:disabled { background: #ded9c6; color: #a7a18d; box-shadow: 0 5px 0 #cdc7b2; cursor: not-allowed; }
+  .btn.secondary { background: var(--green); box-shadow: 0 5px 0 #5f9233; }
+  .btn.secondary:hover { box-shadow: 0 3px 0 #5f9233; }
   .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
 
   /* Summary */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
   .stat { border-radius: 16px; padding: 16px 18px; border: 2px solid transparent; }
-  .stat .num { font-family: "Baloo 2", cursive; font-size: 26px; font-weight: 800; line-height: 1.1; }
-  .stat .lbl { font-size: 12.5px; color: var(--muted); margin-top: 4px; font-weight: 700; }
-  .stat .num.range { font-size: 19px; }
-  .stat:nth-child(5n+1) { background: #fff0e8; border-color: #ffd9c7; }
+  .stat .num { font-family: "Anton", sans-serif; font-size: 30px; font-weight: 400; line-height: 1.05; letter-spacing: .01em; }
+  .stat .lbl { font-size: 12.5px; color: #6f6a5c; margin-top: 5px; font-weight: 700; }
+  .stat .num.range { font-size: 21px; }
+  .stat:nth-child(5n+1) { background: #fdece7; border-color: #f7cabc; }
   .stat:nth-child(5n+1) .num { color: var(--accent-dark); }
-  .stat:nth-child(5n+2) { background: #e6f6fd; border-color: #c4e9f9; }
-  .stat:nth-child(5n+2) .num { color: #2f9fd4; }
-  .stat:nth-child(5n+3) { background: #e4f8f3; border-color: #bff0e4; }
-  .stat:nth-child(5n+3) .num { color: var(--mint); }
-  .stat:nth-child(5n+4) { background: #fff7df; border-color: #ffe9ab; }
+  .stat:nth-child(5n+2) { background: #e7f5fc; border-color: #c2e6f6; }
+  .stat:nth-child(5n+2) .num { color: #2e93c4; }
+  .stat:nth-child(5n+3) { background: #f1f7df; border-color: #d9e9a8; }
+  .stat:nth-child(5n+3) .num { color: #6f9a1c; }
+  .stat:nth-child(5n+4) { background: #fff8d6; border-color: #ffea8a; }
   .stat:nth-child(5n+4) .num { color: #c79400; }
-  .stat:nth-child(5n+5) { background: #f3ecfb; border-color: #e1d2f4; }
-  .stat:nth-child(5n+5) .num { color: var(--grape); }
+  .stat:nth-child(5n+5) { background: #fdeaf1; border-color: #f7c2d7; }
+  .stat:nth-child(5n+5) .num { color: var(--pink); }
 
   .note { padding: 13px 16px; border-radius: 14px; font-size: 14.5px; margin-top: 12px; font-weight: 600; }
   .note.warn { background: var(--warn-bg); color: var(--warn); border: 2px solid #ffdf94; }
@@ -149,9 +161,9 @@
   .tablewrap { overflow: auto; border: 2px solid var(--line); border-radius: 16px; max-height: 460px; }
   table { border-collapse: collapse; width: 100%; font-size: 14px; }
   th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-  th { position: sticky; top: 0; background: #fff3e8; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent-dark); font-weight: 800; }
-  tbody tr:nth-child(even) { background: #fffaf4; }
-  tbody tr:hover { background: #fff0e8; }
+  th { position: sticky; top: 0; background: #f6f2df; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink); font-weight: 800; }
+  tbody tr:nth-child(even) { background: #fcfbf3; }
+  tbody tr:hover { background: #fdece7; }
   td.tk { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--accent-dark); }
   .muted { color: var(--muted); font-size: 13.5px; font-weight: 600; }
   .hidden { display: none; }
@@ -160,7 +172,8 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>🎟️ Preschool Raffle Ticket Maker</h1>
+    <p class="kicker">Summer Play Fest · All People's School</p>
+    <h1>Raffle Ticket Maker</h1>
     <p>Drop in your donations file and we'll turn it into a ready-to-print list of raffle tickets. Everything happens right here in your browser — no uploads, no fuss. 🎉</p>
   </header>
 
