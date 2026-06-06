@@ -11,6 +11,9 @@ visitor's computer.
 - Assigns sequential raffle ticket numbers across two rolls:
   - Roll 1 starts at **100001** (2,000 tickets: 100001–102000)
   - Roll 2 starts at **730161** once roll 1 is exhausted
+- Carries two extra columns through to the output: **Child/Family** and **School (APS/PCS)**,
+  pulled from spreadsheet columns **W** and **X** by default (both adjustable in Settings by
+  column letter). The summary confirms which header each letter mapped to.
 - Shows a summary (donations, total tickets, dollar total, ticket-number range, skipped rows),
   a preview table, and a **Download CSV** button.
 - Warns when a run crosses into roll 2, and alerts if both rolls would be exceeded.

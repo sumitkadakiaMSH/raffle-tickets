@@ -207,6 +207,14 @@
         <label>Roll 2 start #</label>
         <input type="number" id="roll2" value="730161" step="1">
       </div>
+      <div class="field">
+        <label>Child/Family column</label>
+        <input type="text" id="childCol" value="W" maxlength="3" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;">
+      </div>
+      <div class="field">
+        <label>School column (APS/PCS)</label>
+        <input type="text" id="schoolCol" value="X" maxlength="3" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;">
+      </div>
     </div>
     <div class="actions" style="margin-top:16px;">
       <button class="btn" id="generate" disabled>🎫 Make Tickets!</button>
@@ -226,7 +234,7 @@
     <div class="tablewrap">
       <table>
         <thead><tr>
-          <th>Email</th><th># Tickets</th><th>PaymentID</th><th>Donor Name</th><th>Raffle Ticket #</th>
+          <th>Email</th><th># Tickets</th><th>PaymentID</th><th>Donor Name</th><th>Child/Family</th><th>School</th><th>Raffle Ticket #</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -268,9 +276,18 @@ function parseAmount(val) {
 
 // ---------- state ----------
 let parsedRows = null;   // raw CSV rows incl header
-let outputRows = null;   // generated [ [email, count, pid, donor, ticket], ... ] (no header)
+let outputRows = null;   // generated [ [email, count, pid, donor, child, school, ticket], ... ] (no header)
 
-const REQUIRED = ["Email", "Number of raffle tickets", "PaymentID", "Donor Name", "Raffle Ticket Number"];
+const REQUIRED = ["Email", "Number of raffle tickets", "PaymentID", "Donor Name", "Child/Family", "School", "Raffle Ticket Number"];
+
+// Convert a spreadsheet column letter (e.g. "W", "AA") to a 0-based index. Returns -1 if blank/invalid.
+function colLetterToIndex(letter) {
+  const s = String(letter || "").trim().toUpperCase().replace(/[^A-Z]/g, "");
+  if (!s) return -1;
+  let n = 0;
+  for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
+  return n - 1;
+}
 
 // ---------- file handling ----------
 const drop = document.getElementById("drop");
@@ -344,6 +361,22 @@ generateBtn.addEventListener("click", () => {
   const rollSize  = parseInt(document.getElementById("rollSize").value, 10);
   const roll2     = parseInt(document.getElementById("roll2").value, 10);
 
+  // Extra pass-through columns, selected by spreadsheet column letter (default W and X).
+  const childLetter  = String(document.getElementById("childCol").value || "").trim().toUpperCase().replace(/[^A-Z]/g, "");
+  const schoolLetter = String(document.getElementById("schoolCol").value || "").trim().toUpperCase().replace(/[^A-Z]/g, "");
+  const childIdx  = colLetterToIndex(childLetter);
+  const schoolIdx = colLetterToIndex(schoolLetter);
+  const childName  = (childIdx  >= 0 && childIdx  < header.length) ? header[childIdx]  : null;
+  const schoolName = (schoolIdx >= 0 && schoolIdx < header.length) ? header[schoolIdx] : null;
+  function colNote(label, letter, name) {
+    if (!letter) return "<strong>" + label + "</strong>: no column set (will be blank)";
+    if (name == null) return "<strong>" + label + "</strong>: column " + letter + " is past the last column (will be blank)";
+    return "<strong>" + label + "</strong>: column " + letter + " (“" + esc(name) + "”)";
+  }
+  const colNotes = '<div class="note">📋 Extra columns &mdash; ' +
+    colNote("Child/Family", childLetter, childName) + " &nbsp;·&nbsp; " +
+    colNote("School", schoolLetter, schoolName) + ".</div>";
+
   function ticketNumber(i) {
     if (i < rollSize) return roll1 + i;
     if (i < rollSize * 2) return roll2 + (i - rollSize);
@@ -360,8 +393,10 @@ generateBtn.addEventListener("click", () => {
       donationsUsed++;
       totalDollars += amount;
       const email = r[idxEmail], pid = r[idxPid], donor = r[idxDonor];
+      const child  = childIdx  >= 0 ? (r[childIdx]  || "") : "";
+      const school = schoolIdx >= 0 ? (r[schoolIdx] || "") : "";
       for (let k = 0; k < count; k++) {
-        outputRows.push([email, count, pid, donor, ticketNumber(ticketIndex)]);
+        outputRows.push([email, count, pid, donor, child, school, ticketNumber(ticketIndex)]);
         ticketIndex++;
       }
     } else {
@@ -369,7 +404,7 @@ generateBtn.addEventListener("click", () => {
     }
   });
 
-  renderSummary({ ticketIndex, skipped, donationsUsed, totalDollars, roll1, roll2, rollSize });
+  renderSummary({ ticketIndex, skipped, donationsUsed, totalDollars, roll1, roll2, rollSize, colNotes });
   renderPreview();
   downloadBtn.classList.remove("hidden");
 });
@@ -392,7 +427,7 @@ function renderSummary(s) {
     '<div class="stat"><div class="num ' + (x.range ? 'range' : '') + '">' + x.num + '</div><div class="lbl">' + x.lbl + "</div></div>"
   ).join("");
 
-  let notes = "";
+  let notes = s.colNotes || "";
   if (total > s.rollSize) {
     const intoRoll2 = total - s.rollSize;
     notes += '<div class="note warn">⚠️ This run crosses into the <strong>second roll</strong> (starts at ' +
@@ -427,7 +462,8 @@ function renderPreview() {
   const shown = outputRows.slice(0, LIMIT);
   tbody.innerHTML = shown.map(r =>
     "<tr><td>" + esc(r[0]) + "</td><td>" + r[1] + "</td><td>" + esc(r[2]) +
-    "</td><td>" + esc(r[3]) + '</td><td class="tk">' + r[4] + "</td></tr>"
+    "</td><td>" + esc(r[3]) + "</td><td>" + esc(r[4]) + "</td><td>" + esc(r[5]) +
+    '</td><td class="tk">' + r[6] + "</td></tr>"
   ).join("");
   document.getElementById("previewCount").textContent =
     outputRows.length > LIMIT
